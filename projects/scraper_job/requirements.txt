@@ -1,0 +1,12 @@
+requests
+beautifulsoup4
+pandas
+openpyxl
+playwright
+pypdf
+Pillow
+reportlab
+feedparser
+streamlit
+selenium
+pyyaml

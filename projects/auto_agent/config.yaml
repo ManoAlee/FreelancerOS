@@ -1,0 +1,37 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# FreelancerOS: Enterprise Agent Config
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+agent:
+  name: "Auto-Agent v2"
+  loop_interval_seconds: 60
+  headless_browser: true
+
+feeds:
+  # Upwork RSS feeds or other aggregators
+  - "https://weworkremotely.com/categories/remote-back-end-programming-jobs.rss"
+  - "https://weworkremotely.com/categories/remote-design-jobs.rss"
+
+filters:
+  # Minimum score (0-100) to trigger an application
+  min_confidence_score: 75
+  blacklist_words: ["senior", "lead", "architect"] # Avoid jobs we can't do
+
+credentials:
+  linkedin:
+    email: "CHANGE_ME"
+    password: "CHANGE_ME"
+  smtp:
+    host: "smtp.gmail.com"
+    port: 587
+    user: "CHANGE_ME"
+    pass: "CHANGE_ME"
+
+skills_matrix:
+  # Keyword -> Weight
+  "python": 10
+  "automation": 10
+  "scraping": 8
+  "pdf": 5
+  "excel": 5
+  "design": 3

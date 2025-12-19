@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serviço Profissional | Solução Rápida</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: #f8fafc;
+        }
+        
+        /* Premium Background Mesh Gradient */
+        .premium-bg {
+            background-color: #EEF2FF;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-size: cover;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .glass-dark {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- HERO SECTION with Dark Premium Gradient -->
+    <div class="premium-bg relative overflow-hidden">
+        <!-- Decoration Orbs -->
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+
+        <header class="glass-dark border-b border-gray-800 relative z-10">
+            <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
+                <div class="text-2xl font-bold text-white tracking-tight">Hyper<span class="text-blue-400">Freelance</span></div>
+                <a href="#contact" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-2 rounded-full font-medium transition backdrop-blur-md">Fale Comigo</a>
+            </div>
+        </header>
+
+        <main class="relative z-10 pt-24 pb-32">
+            <section class="max-w-4xl mx-auto px-6 text-center">
+                <div class="inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-200 text-sm font-medium">
+                    ✨ Disponível para novos projetos
+                </div>
+                <h1 class="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+                    Resolva Problemas Complexos com <br />
+                    <span class="text-gradient">Simplicidade & Elegância</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+                    Especialista em automação e desenvolvimento de alto impacto. Entrego soluções que economizam seu tempo e geram lucro.
+                </p>
+                <div class="flex flex-col md:flex-row justify-center gap-5">
+                    <a href="#contact" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-500 transition shadow-lg shadow-blue-500/30">
+                        Iniciar Projeto
+                    </a>
+                    <a href="#portfolio" class="bg-white/5 text-white border border-white/10 px-10 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition backdrop-blur-sm">
+                        Ver Portfolio
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- FEATURES / BENEFITS (Light Mode Section) -->
+    <section class="bg-gray-50 py-24 -mt-10 rounded-t-[3rem] relative z-20">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Por que me contratar?</h2>
+                <div class="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition duration-300">
+                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center text-3xl mb-6">🚀</div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-900">Entrega Relâmpago</h3>
+                    <p class="text-gray-600 leading-relaxed">Foco no MVP (Mínimo Produto Viável). Você vê resultados em dias, não meses.</p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition duration-300">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-3xl mb-6">💎</div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-900">Qualidade Premium</h3>
+                    <p class="text-gray-600 leading-relaxed">Código limpo, arquitetura escalável e design que impressiona seus investidores.</p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl hover:-translate-y-2 transition duration-300">
+                    <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center text-3xl mb-6">🤝</div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-900">Parceria Estratégica</h3>
+                    <p class="text-gray-600 leading-relaxed">Não sou apenas um executor. Atuo como consultor para melhorar sua ideia.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PORTFOLIO SECTION -->
+    <section id="portfolio" class="py-24 bg-white">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex justify-between items-end mb-16">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Trabalhos Selecionados</h2>
+                    <p class="text-gray-500">Últimos projetos entregues com sucesso.</p>
+                </div>
+                <!-- <a href="#" class="text-blue-600 font-semibold hover:underline hidden md:block">Ver todos os projetos &rarr;</a> -->
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-10">
+                <!-- Project 1 -->
+                <div class="group cursor-pointer">
+                    <div class="bg-gray-100 rounded-2xl overflow-hidden shadow-sm relative aspect-video mb-6 group-hover:shadow-xl transition duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent opacity-60"></div>
+                        <div class="absolute bottom-6 left-6 text-white">
+                            <div class="text-sm font-semibold uppercase tracking-wider mb-1 text-blue-300">Automação</div>
+                            <div class="text-2xl font-bold">Data E-commerce Extractor</div>
+                        </div>
+                        <!-- Placeholder Image -->
+                        <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 bg-[url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800')] bg-cover bg-center">
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Script Python de alta performance para extração de dados de competidores, gerando relatórios estratégicos em Excel.</p>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="group cursor-pointer">
+                    <div class="bg-gray-100 rounded-2xl overflow-hidden shadow-sm relative aspect-video mb-6 group-hover:shadow-xl transition duration-500">
+                         <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent opacity-60"></div>
+                        <div class="absolute bottom-6 left-6 text-white">
+                            <div class="text-sm font-semibold uppercase tracking-wider mb-1 text-purple-300">Web App</div>
+                            <div class="text-2xl font-bold">Dashboard Financeiro MVP</div>
+                        </div>
+                        <!-- Placeholder Image -->
+                        <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 bg-[url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800')] bg-cover bg-center">
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Interface administrativa moderna para visualização de métricas financeiras em tempo real usando React e Charts.js.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="py-24 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="glass-card bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-gray-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+                
+                <div class="relative z-10 text-center mb-10">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Vamos Impulsionar seu Negócio?</h2>
+                    <p class="text-gray-600">Respondo propostas em até 2 horas úteis.</p>
+                </div>
+
+                <form class="space-y-6 relative z-10">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Seu Nome</label>
+                            <input type="text" class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="João Silva">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Seu Email</label>
+                            <input type="email" class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="joao@empresa.com">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Detalhes do Projeto</label>
+                        <textarea rows="4" class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Preciso de ajuda com..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-black transition shadow-lg transform hover:-translate-y-1">
+                        Enviar Proposta
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-white border-t border-gray-100 py-12 text-center text-gray-500 text-sm">
+        <p>&copy; 2025 Agente Freelancer. Design by Antigravity.</p>
+    </footer>
+
+</body>
+</html>
