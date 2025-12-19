@@ -105,42 +105,15 @@ Este projeto adota uma política de **Tolerância Zero** para desorganização. 
 
 ---
 
-## 🧠 Arquitetura Cognitiva Simbiótica (Scientist Level)
+## 🧠 Arquitetura Cognitiva Científica (MCP-SCI v1.0)
 
-Este projeto implementa um pipeline de IA de 7 Camadas, transcendendo simples chamadas de API.
+Este projeto opera sob o protocolo **MCP-SCI v1.0**, garantindo rigor científico em todas as ações autônomas.
 
-┌──────────────────────────┐
-│        INPUT LAYER       │
-└────────────┬─────────────┘
-             ↓
-┌──────────────────────────┐
-│  INTENT & RISK ANALYZER  │
-│  - Compliance & Safety   │
-└────────────┬─────────────┘
-             ↓
-┌──────────────────────────┐
-│ CONTEXT ORCHESTRATOR     │
-│  - Gerenciamento de Estado│
-└────────────┬─────────────┘
-             ↓
-┌──────────────────────────┐
-│ MEMORY ENGINE            │
-│  - SQL + Vector (RAG)    │
-└────────────┬─────────────┘
-             ↓
-┌──────────────────────────┐
-│ RESPONSE STRATEGY CORE   │
-│  - Planejamento Tático   │
-└────────────┬─────────────┘
-             ↓
-┌──────────────────────────┐
-│ SELF-CRITIC & REWRITE    │
-│  - Refinamento de Qualidade│
-└────────────┬─────────────┘
-             ↓
-┌──────────────────────────┐
-│        OUTPUT            │
-└──────────────────────────┘
+### Ciclo de Operação ("The Scientific Loop")
+1.  **Definição de Estado:** Verificação de suficiência de dados (N > 0).
+2.  **Análise de Evidências:** Geração de hipóteses baseadas *apenas* em dados observados.
+3.  **Execução Controlada:** Procedimentos validados sem alucinação.
+4.  **Verificação:** Validação dos resultados pós-ação.
 
-**Implementação:** `system/ai_engine/cognitive_pipeline.py`
-**Protocolo MCP:** `system/mcp_core/` (Tools Self-Discovery)
+**Implementação:** `system/ai_engine/autonomous_loop.py`
+**Protocolo Mestre:** `system/ai_engine/prompts.py`

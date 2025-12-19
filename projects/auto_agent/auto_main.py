@@ -1,52 +1,27 @@
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# FreelancerOS: AUTOMOUS AGENT CORE (auto_main.py)
+# AGENTE FREELANCER - AUTO MAIN (Self-Driving)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# "Zero-Touch" Infinite Loop
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-import time
 import sys
-from hunter import Hunter
-from brain import Brain
-from hand import Hand
+import os
+
+# Add project root to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from system.ai_engine.autonomous_loop import AutonomousLoop
+from system.config.config import CONFIG
 
 def main():
-    print("🤖 STARTING AUTONOMOUS FREELANCER AGENT...")
-    print("   Mode: Zero-Touch")
-    print("   Press Ctrl+C to stop.")
-    print("---------------------------------------------")
+    print("🤖 Booting FreelancerOS Self-Driving Agent [vΩ]...")
     
-    hunter = Hunter()
-    brain = Brain()
-    hand = Hand()
+    # Define primary objective from config
+    objective = f"Find and apply for jobs in niche: {CONFIG.get('TARGET_NICHE', 'General')}"
     
-    cycle_count = 0
+    # Initialize the vΩ Engine
+    bot = AutonomousLoop(objective=objective)
     
-    try:
-        while True:
-            cycle_count += 1
-            print(f"\n⏳ [SYSTEM] Cycle #{cycle_count}")
-            
-            # 1. HUNT
-            jobs = hunter.scan()
-            
-            # 2. ANALYZE & ACT
-            for job in jobs:
-                analysis = brain.analyze(job)
-                
-                if analysis:
-                    # 3. WORK
-                    work_result = brain.execute_work(analysis)
-                    
-                    # 4. DELIVER
-                    hand.submit(analysis)
-            
-            # Wait for next cycle (short for demo, long for real)
-            print("💤 [SYSTEM] Sleeping for 30s...")
-            time.sleep(30)
-            
-    except KeyboardInterrupt:
-        print("\n🛑 [SYSTEM] Agent Stopped by User.")
+    # Start the Infinite Cycle
+    bot.run_forever()
 
 if __name__ == "__main__":
     main()
