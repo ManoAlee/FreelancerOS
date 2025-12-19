@@ -13,7 +13,10 @@ from openai import OpenAI
 
 # Load Config
 try:
-    from FreelancerOS.config import CONFIG
+    import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+from projects.Agent_Legacy.config import CONFIG
 except ImportError:
     CONFIG = {
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"), 

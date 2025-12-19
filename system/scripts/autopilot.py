@@ -2,7 +2,13 @@ import time
 import logging
 import datetime
 import random
-from config import CONFIG
+import sys
+import os
+
+# Add project root to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from system.config.config import CONFIG
 from system.skills.scraper_pro import ScraperPro
 from system.modules.email_sender import EmailSender
 

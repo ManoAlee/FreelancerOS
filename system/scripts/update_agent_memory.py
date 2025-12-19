@@ -1,6 +1,4 @@
 import os
-
-content = r'''import os
 import time
 import json
 import requests
@@ -14,13 +12,51 @@ from openai import OpenAI
 
 # Load Config
 try:
-    from FreelancerOS.config import CONFIG
+    import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+from projects.Agent_Legacy.config import CONFIG
 except ImportError:
     CONFIG = {
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"), 
         "GOOGLE_API_KEY": os.getenv("GOOGLE_API_KEY"), 
         "HEADLESS": False
     }
+
+# --- MEMORY SYSTEM ---
+class Memory:
+    def __init__(self, filename="mission_history.json"):
+        self.filename = filename
+        self.history = self._load()
+
+    def _load(self):
+        if os.path.exists(self.filename):
+            try:
+                with open(self.filename, 'r') as f:
+                    return json.load(f)
+            except:
+                return {"applied_jobs": [], "blacklist": []}
+        return {"applied_jobs": [], "blacklist": []}
+
+    def save(self):
+        with open(self.filename, 'w') as f:
+            json.dump(self.history, f, indent=4)
+
+    def add_applied(self, url, title):
+        if url not in [j['url'] for j in self.history['applied_jobs']]:
+            self.history['applied_jobs'].append({
+                "url": url,
+                "title": title,
+                "timestamp": time.time()
+            })
+            self.save()
+
+    def is_processed(self, url):
+        # Check if URL is in applied list
+        for job in self.history['applied_jobs']:
+            if job['url'] == url:
+                return True
+        return False
 
 class GeminiClient:
     """
@@ -89,6 +125,7 @@ class FreelancerAgent:
         
         self.client = None
         self.gemini = None
+        self.memory = Memory() # Initialize Memory
         
         # Init Gemini (REST)
         if self.google_key:
@@ -104,6 +141,16 @@ class FreelancerAgent:
                 pass
         
         self.driver = self._setup_driver()
+        
+        # GLOBAL CONTEXT - The "Soul" of the Agent
+        self.persona = """
+        YOU ARE AN ELITE FREELANCER AGENT.
+        YOUR NAME: FreelancerOS Bot.
+        YOUR SKILLS: Python, Selenium, Web Scraping, Automation, Data Mining, Excel VBA, Bot Development.
+        YOUR GOAL: Find high-value automation jobs and write winning proposals.
+        TONE: Professional, confident, concise, result-oriented.
+        NEVER hallucinate skills you don't have (like Video Editing or Translation).
+        """
 
     def _setup_driver(self):
         options = Options()
@@ -120,7 +167,8 @@ class FreelancerAgent:
         """
         The Agent's Inner Monologue.
         """
-        full_prompt = f"CONTEXT:\n{context}\n\nTASK:\n{prompt}\n\nOUTPUT:\nJust the raw answer."
+        # Inject Persona into every thought process to maintain context
+        full_prompt = f"SYSTEM_PERSONA:\n{self.persona}\n\nCONTEXT:\n{context}\n\nTASK:\n{prompt}\n\nOUTPUT:\nJust the raw answer."
         
         # 1. Try Gemini
         if self.gemini:
@@ -176,16 +224,20 @@ class FreelancerAgent:
         try:
             body_text = self.driver.find_element(By.TAG_NAME, "body").text
             # Limit text to avoid payload limits
-            clean_text = body_text.replace("\n", " ")[:8000]
+            clean_text = body_text.replace("\n", " ")[:12000]
             
             prompt = """
-            Identify the current job listings in this text.
-            For each job, extract: title, budget (if visible).
-            Return ONLY a valid JSON list: [{"title": "Sample Job", "budget": "$30 - $250 USD"}].
-            If no specific jobs are listed, return [].
+            Analyze the text and extract job listings.
+            
+            CRITERIA:
+            1. FILTER: Keep ONLY jobs strictly related to: Python, Web Scraping, Automation, Bots, Scripting, Excel VBA.
+            2. EXCLUDE: Video editing, Design, Translation, Writing, Marketing, Shopify Store Setup (unless coding involved).
+            3. FORMAT: Return a valid JSON list: [{"title": "Job Title", "budget": "$XX"}].
+            
+            If no relevant jobs are found, return [].
             """
             
-            print("   🧠 Analyzing with AI...")
+            print("   🧠 Analyzing & Filtering with AI...")
             response = self.think(clean_text, prompt)
             
             if not response:
@@ -202,6 +254,64 @@ class FreelancerAgent:
             print(f"   ⚠️ Analysis Error: {e}")
             return []
 
+    def apply_to_job(self, job, job_url):
+        """
+        Navigates to the job page and places a bid.
+        """
+        print(f"      🤖 Analyzing Job Page: {self.driver.title}")
+        
+        # Generate Bid
+        bid_prompt = f"Write a professional, concise (2-3 sentences) bid for: {job['title']}. Emphasize Python, Selenium, and Automation skills. No placeholders."
+        bid = self.think("I am an expert Python Automator.", bid_prompt)
+        
+        if not bid:
+            print("      ⚠️ Failed to generate bid text.")
+            return
+
+        print(f"      ✍️  Bid Prepared: \"{bid[:60]}...\"")
+        
+        try:
+            # 1. Input Proposal
+            print("      ⏳ Waiting for proposal form...")
+            # Increased timeout to 15s and added more selectors
+            desc_box = WebDriverWait(self.driver, 15).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "textarea#description, textarea[name='description'], textarea[placeholder*='proposal'], textarea.proposal-description"))
+            )
+            
+            # Scroll into view to ensure visibility
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", desc_box)
+            time.sleep(1)
+            
+            desc_box.clear()
+            desc_box.send_keys(bid)
+            time.sleep(1)
+            
+            # 2. Input Amount (Optional - often prefilled)
+            # try:
+            #     amount_box = self.driver.find_element(By.CSS_SELECTOR, "input.bid-amount, input[name='sum']")
+            #     amount_box.clear()
+            #     amount_box.send_keys("50") # Default or AI decided
+            # except:
+            #     pass
+            
+            # 3. Click Place Bid
+            print("      👆 Looking for Place Bid button...")
+            place_btn = self.driver.find_element(By.CSS_SELECTOR, "button#place-bid, button[data-id='place-bid-btn'], button.btn-primary, button.btn-success")
+            
+            # Scroll into view
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", place_btn)
+            time.sleep(1)
+            
+            # REAL SUBMISSION ENABLED
+            place_btn.click()
+            print("      🚀 BID SUBMITTED SUCCESSFULLY!")
+            
+            # SAVE TO MEMORY
+            self.memory.add_applied(job_url, job['title'])
+            
+        except Exception as e:
+            print(f"      ⚠️ Form interaction failed: {e}")
+
     def run_mission(self, mission_desc):
         print(f"\n🤖 MISSION START")
         
@@ -213,7 +323,6 @@ class FreelancerAgent:
         
         # 2. Search
         print(f"\n🔎 Searching for Targets...")
-        # Use a simpler URL for stability
         self.driver.get("https://www.freelancer.com/jobs/python-automation/")
         time.sleep(5)
         
@@ -221,28 +330,58 @@ class FreelancerAgent:
         jobs = self.scan_page_for_jobs()
         
         if jobs:
-            print(f"   ✅ AI Found {len(jobs)} Active Targets.")
+            print(f"   ✅ AI Found {len(jobs)} RELEVANT Targets.")
+            
+            # Find all project links on the search page to match against AI results
+            # Freelancer links usually look like /projects/category/project-name
+            page_links = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/projects/']")
+            
             for i, job in enumerate(jobs):
                 title = job.get('title', 'Unknown')
                 budget = job.get('budget', 'N/A')
                 print(f"\n   🎯 Target #{i+1}: {title} ({budget})")
                 
-                # 4. Draft Bid
-                bid_prompt = f"Write a professional, 2-sentence bid for: {title}"
-                bid = self.think("I am an expert Python Automator.", bid_prompt)
+                # 4. Match AI Job to Selenium Element
+                target_link = None
+                for link in page_links:
+                    try:
+                        # Fuzzy match: Check if first 15 chars of title exist in link text
+                        if title[:15].lower() in link.text.lower():
+                            target_link = link
+                            break
+                    except: continue
                 
-                if bid:
-                    print(f"      ✍️ Generated Bid: \"{bid}\"")
+                if target_link:
+                    href = target_link.get_attribute('href')
+                    
+                    # CHECK MEMORY
+                    if self.memory.is_processed(href):
+                        print(f"      ⏭️  Skipping (Already Applied): {title}")
+                        continue
+                        
+                    print(f"      🔗 Opening: {href}")
+                    
+                    # Open in new tab
+                    self.driver.execute_script(f"window.open('{href}', '_blank');")
+                    self.driver.switch_to.window(self.driver.window_handles[-1])
+                    time.sleep(5) # Wait for load
+                    
+                    # 5. Apply
+                    self.apply_to_job(job, href)
+                    
+                    # Close tab and return
+                    self.driver.close()
+                    self.driver.switch_to.window(self.driver.window_handles[0])
+                    
+                    # 6. Pause (Anti-Ban & Quota Management)
+                    print("      zzz Sleeping 15s (Rate Limit Protection)...")
+                    time.sleep(15)
                 else:
-                    print(f"      ⚠️ Could not generate bid.")
+                    print("      ⚠️ Could not find clickable link for this job.")
+                    
         else:
             print("   ⚠️ No targets identified on this page.")
             print("      (Tip: Check if the search URL has results visible as text)")
 
     def close(self):
         self.driver.quit()
-'''
-
-with open('FreelancerOS/modules/agent_browser.py', 'w', encoding='utf-8') as f:
-    f.write(content)
-print("File updated successfully.")

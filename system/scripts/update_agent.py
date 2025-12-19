@@ -14,7 +14,10 @@ from openai import OpenAI
 
 # Load Config
 try:
-    from FreelancerOS.config import CONFIG
+    import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+from projects.Agent_Legacy.config import CONFIG
 except ImportError:
     CONFIG = {
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"), 
@@ -176,20 +179,16 @@ class FreelancerAgent:
         try:
             body_text = self.driver.find_element(By.TAG_NAME, "body").text
             # Limit text to avoid payload limits
-            clean_text = body_text.replace("\n", " ")[:12000]
+            clean_text = body_text.replace("\n", " ")[:8000]
             
             prompt = """
-            Analyze the text and extract job listings.
-            
-            CRITERIA:
-            1. FILTER: Keep ONLY jobs strictly related to: Python, Web Scraping, Automation, Bots, Scripting, Excel VBA.
-            2. EXCLUDE: Video editing, Design, Translation, Writing, Marketing, Shopify Store Setup (unless coding involved).
-            3. FORMAT: Return a valid JSON list: [{"title": "Job Title", "budget": "$XX"}].
-            
-            If no relevant jobs are found, return [].
+            Identify the current job listings in this text.
+            For each job, extract: title, budget (if visible).
+            Return ONLY a valid JSON list: [{"title": "Sample Job", "budget": "$30 - $250 USD"}].
+            If no specific jobs are listed, return [].
             """
             
-            print("   🧠 Analyzing & Filtering with AI...")
+            print("   🧠 Analyzing with AI...")
             response = self.think(clean_text, prompt)
             
             if not response:
@@ -206,55 +205,6 @@ class FreelancerAgent:
             print(f"   ⚠️ Analysis Error: {e}")
             return []
 
-    def apply_to_job(self, job):
-        """
-        Navigates to the job page and places a bid.
-        """
-        print(f"      🤖 Analyzing Job Page...")
-        
-        # Generate Bid
-        bid_prompt = f"Write a professional, concise (2-3 sentences) bid for: {job['title']}. Emphasize Python, Selenium, and Automation skills. No placeholders."
-        bid = self.think("I am an expert Python Automator.", bid_prompt)
-        
-        if not bid:
-            print("      ⚠️ Failed to generate bid text.")
-            return
-
-        print(f"      ✍️  Bid Prepared: \"{bid[:60]}...\"")
-        
-        try:
-            # 1. Input Proposal
-            # Try multiple selectors for robustness
-            desc_box = WebDriverWait(self.driver, 5).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "textarea#description, textarea[name='description'], textarea[placeholder*='proposal']"))
-            )
-            desc_box.clear()
-            desc_box.send_keys(bid)
-            time.sleep(1)
-            
-            # 2. Input Amount (Optional - often prefilled)
-            # try:
-            #     amount_box = self.driver.find_element(By.CSS_SELECTOR, "input.bid-amount, input[name='sum']")
-            #     amount_box.clear()
-            #     amount_box.send_keys("50") # Default or AI decided
-            # except:
-            #     pass
-            
-            # 3. Click Place Bid
-            # Look for the primary action button
-            place_btn = self.driver.find_element(By.CSS_SELECTOR, "button#place-bid, button[data-id='place-bid-btn'], button.btn-primary")
-            
-            # UNCOMMENT TO ENABLE REAL SUBMISSION
-            # place_btn.click()
-            # print("      🚀 BID SUBMITTED (Simulated)!")
-            
-            # For now, just highlight it to show we found it
-            self.driver.execute_script("arguments[0].style.border='3px solid red'", place_btn)
-            print("      🎯 Ready to Submit (Button Found & Highlighted). Enable click() in code to finalize.")
-            
-        except Exception as e:
-            print(f"      ⚠️ Form interaction failed: {e}")
-
     def run_mission(self, mission_desc):
         print(f"\n🤖 MISSION START")
         
@@ -266,6 +216,7 @@ class FreelancerAgent:
         
         # 2. Search
         print(f"\n🔎 Searching for Targets...")
+        # Use a simpler URL for stability
         self.driver.get("https://www.freelancer.com/jobs/python-automation/")
         time.sleep(5)
         
@@ -273,49 +224,20 @@ class FreelancerAgent:
         jobs = self.scan_page_for_jobs()
         
         if jobs:
-            print(f"   ✅ AI Found {len(jobs)} RELEVANT Targets.")
-            
-            # Find all project links on the search page to match against AI results
-            # Freelancer links usually look like /projects/category/project-name
-            page_links = self.driver.find_elements(By.CSS_SELECTOR, "a[href*='/projects/']")
-            
+            print(f"   ✅ AI Found {len(jobs)} Active Targets.")
             for i, job in enumerate(jobs):
                 title = job.get('title', 'Unknown')
                 budget = job.get('budget', 'N/A')
                 print(f"\n   🎯 Target #{i+1}: {title} ({budget})")
                 
-                # 4. Match AI Job to Selenium Element
-                target_link = None
-                for link in page_links:
-                    try:
-                        # Fuzzy match: Check if first 15 chars of title exist in link text
-                        if title[:15].lower() in link.text.lower():
-                            target_link = link
-                            break
-                    except: continue
+                # 4. Draft Bid
+                bid_prompt = f"Write a professional, 2-sentence bid for: {title}"
+                bid = self.think("I am an expert Python Automator.", bid_prompt)
                 
-                if target_link:
-                    href = target_link.get_attribute('href')
-                    print(f"      🔗 Opening: {href}")
-                    
-                    # Open in new tab
-                    self.driver.execute_script(f"window.open('{href}', '_blank');")
-                    self.driver.switch_to.window(self.driver.window_handles[-1])
-                    time.sleep(5) # Wait for load
-                    
-                    # 5. Apply
-                    self.apply_to_job(job)
-                    
-                    # Close tab and return
-                    self.driver.close()
-                    self.driver.switch_to.window(self.driver.window_handles[0])
-                    
-                    # 6. Pause (Anti-Ban & Quota Management)
-                    print("      zzz Sleeping 15s (Rate Limit Protection)...")
-                    time.sleep(15)
+                if bid:
+                    print(f"      ✍️ Generated Bid: \"{bid}\"")
                 else:
-                    print("      ⚠️ Could not find clickable link for this job.")
-                    
+                    print(f"      ⚠️ Could not generate bid.")
         else:
             print("   ⚠️ No targets identified on this page.")
             print("      (Tip: Check if the search URL has results visible as text)")

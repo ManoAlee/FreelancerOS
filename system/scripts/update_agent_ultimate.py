@@ -12,11 +12,14 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import WebDriverException
+from openai import OpenAI
 
 # --- CONFIGURATION ---
 try:
-    from FreelancerOS.config import CONFIG
+    import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+from projects.Agent_Legacy.config import CONFIG
 except ImportError:
     CONFIG = {
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"), 
@@ -158,21 +161,8 @@ class FreelancerAgent:
 
         targets = []
         try:
-            # Get all project cards (Try multiple selectors)
-            selectors = [
-                "div.JobSearchCard-item", 
-                "div.ProjectCard", 
-                "div.JobSearchCard-primary",
-                "div[data-project-card]",
-                "tr.JobSearchCard-item"
-            ]
-            
-            cards = []
-            for sel in selectors:
-                found = self.driver.find_elements(By.CSS_SELECTOR, sel)
-                if found:
-                    cards = found
-                    break
+            # Get all project cards
+            cards = self.driver.find_elements(By.CSS_SELECTOR, "div.JobSearchCard-item")
             
             print(f"   👀 Visible Projects: {len(cards)}")
             
@@ -181,17 +171,7 @@ class FreelancerAgent:
 
             for card in cards:
                 try:
-                    # Try multiple title selectors
-                    title_selectors = ["a.JobSearchCard-primary-heading-link", "a.ProjectCard-title", "a.JobSearchCard-title"]
-                    title_el = None
-                    for t_sel in title_selectors:
-                        try:
-                            title_el = card.find_element(By.CSS_SELECTOR, t_sel)
-                            break
-                        except: continue
-                    
-                    if not title_el: continue
-
+                    title_el = card.find_element(By.CSS_SELECTOR, "a.JobSearchCard-primary-heading-link")
                     title = title_el.text.strip()
                     url = title_el.get_attribute("href")
                     
@@ -212,9 +192,6 @@ class FreelancerAgent:
 
         except Exception as e:
             print(f"   ⚠️ Scan Error: {e}")
-            if "connection" in str(e).lower() or "refused" in str(e).lower() or "invalid session" in str(e).lower():
-                 print("   🛑 Browser connection lost. Stopping mission.")
-                 raise KeyboardInterrupt
 
         print(f"   🎯 Filtered Targets: {len(targets)} potential jobs.")
         return targets[:5] # Process top 5 to avoid fatigue
@@ -266,10 +243,8 @@ class FreelancerAgent:
         except Exception as e:
             print(f"      ⚠️ Execution Error: {e}")
         finally:
-            try:
-                self.driver.close()
-                self.driver.switch_to.window(self.driver.window_handles[0])
-            except: pass
+            self.driver.close()
+            self.driver.switch_to.window(self.driver.window_handles[0])
 
     def _place_bid(self, text):
         try:
@@ -292,9 +267,11 @@ class FreelancerAgent:
         except:
             print("      ⚠️ Could not submit form (Button/Box not found).")
 
-    def run_mission(self, mission_details=""):
-        print(f"   📜 Mission Started: {mission_details}")
-        
+    def run(self):
+        user = CONFIG.get('FREELANCER_USER')
+        pwd = CONFIG.get('FREELANCER_PASS')
+        if user: self.login(user, pwd)
+
         while True:
             targets = self.find_opportunities()
             
@@ -310,9 +287,7 @@ class FreelancerAgent:
                 time.sleep(sleep_time)
 
     def close(self):
-        try:
-            self.driver.quit()
-        except: pass
+        self.driver.quit()
 '''
 
 with open('FreelancerOS/modules/agent_browser.py', 'w', encoding='utf-8') as f:

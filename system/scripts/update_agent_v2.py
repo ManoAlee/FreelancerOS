@@ -14,7 +14,10 @@ from openai import OpenAI
 
 # Load Config
 try:
-    from FreelancerOS.config import CONFIG
+    import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+from projects.Agent_Legacy.config import CONFIG
 except ImportError:
     CONFIG = {
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"), 
@@ -210,7 +213,7 @@ class FreelancerAgent:
         """
         Navigates to the job page and places a bid.
         """
-        print(f"      🤖 Analyzing Job Page: {self.driver.title}")
+        print(f"      🤖 Analyzing Job Page...")
         
         # Generate Bid
         bid_prompt = f"Write a professional, concise (2-3 sentences) bid for: {job['title']}. Emphasize Python, Selenium, and Automation skills. No placeholders."
@@ -224,16 +227,10 @@ class FreelancerAgent:
         
         try:
             # 1. Input Proposal
-            print("      ⏳ Waiting for proposal form...")
-            # Increased timeout to 15s and added more selectors
-            desc_box = WebDriverWait(self.driver, 15).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "textarea#description, textarea[name='description'], textarea[placeholder*='proposal'], textarea.proposal-description"))
+            # Try multiple selectors for robustness
+            desc_box = WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "textarea#description, textarea[name='description'], textarea[placeholder*='proposal']"))
             )
-            
-            # Scroll into view to ensure visibility
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", desc_box)
-            time.sleep(1)
-            
             desc_box.clear()
             desc_box.send_keys(bid)
             time.sleep(1)
@@ -247,22 +244,19 @@ class FreelancerAgent:
             #     pass
             
             # 3. Click Place Bid
-            print("      👆 Looking for Place Bid button...")
-            place_btn = self.driver.find_element(By.CSS_SELECTOR, "button#place-bid, button[data-id='place-bid-btn'], button.btn-primary, button.btn-success")
+            # Look for the primary action button
+            place_btn = self.driver.find_element(By.CSS_SELECTOR, "button#place-bid, button[data-id='place-bid-btn'], button.btn-primary")
             
-            # Scroll into view
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", place_btn)
-            time.sleep(1)
+            # UNCOMMENT TO ENABLE REAL SUBMISSION
+            # place_btn.click()
+            # print("      🚀 BID SUBMITTED (Simulated)!")
             
-            # REAL SUBMISSION ENABLED
-            place_btn.click()
-            print("      🚀 BID SUBMITTED SUCCESSFULLY!")
+            # For now, just highlight it to show we found it
+            self.driver.execute_script("arguments[0].style.border='3px solid red'", place_btn)
+            print("      🎯 Ready to Submit (Button Found & Highlighted). Enable click() in code to finalize.")
             
         except Exception as e:
             print(f"      ⚠️ Form interaction failed: {e}")
-            # Dump page source for debugging if needed
-            # with open("debug_page.html", "w", encoding="utf-8") as f:
-            #     f.write(self.driver.page_source)
 
     def run_mission(self, mission_desc):
         print(f"\n🤖 MISSION START")

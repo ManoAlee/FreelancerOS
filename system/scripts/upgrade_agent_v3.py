@@ -12,16 +12,20 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from openai import OpenAI
+from selenium.common.exceptions import WebDriverException
 
 # --- CONFIGURATION ---
 try:
-    from FreelancerOS.config import CONFIG
+    import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+from projects.Agent_Legacy.config import CONFIG
 except ImportError:
     CONFIG = {
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"), 
         "GOOGLE_API_KEY": os.getenv("GOOGLE_API_KEY"), 
-        "HEADLESS": False
+        "HEADLESS": False,
+        "DRY_RUN": False # Set to True to test without bidding
     }
 
 # --- PERSISTENT MEMORY ---
@@ -110,9 +114,9 @@ class FreelancerAgent:
         google_key = CONFIG.get("GOOGLE_API_KEY") or os.getenv("GOOGLE_API_KEY")
         if google_key:
             self.ai = CortexAI(google_key)
-            print("   🧠 Cortex V2: Online (Google Gemini Cluster)")
+            print("   🧠 Cortex V3: Online (Google Gemini Cluster)")
         else:
-            print("   ⚠️ Cortex V2: Offline (No API Key found)")
+            print("   ⚠️ Cortex V3: Offline (No API Key found)")
 
         self.driver = self._setup_driver()
 
@@ -120,6 +124,15 @@ class FreelancerAgent:
         options = Options()
         if CONFIG.get("HEADLESS", False):
             options.add_argument("--headless=new")
+        
+        # Stealth Mode: Random User Agent
+        user_agents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0"
+        ]
+        options.add_argument(f"user-agent={random.choice(user_agents)}")
+        
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument("--no-sandbox")
         options.add_argument("--start-maximized")
@@ -129,7 +142,7 @@ class FreelancerAgent:
     def login(self, username, password):
         print("\n🔑 Security: Authenticating...")
         self.driver.get("https://www.freelancer.com/login")
-        time.sleep(3)
+        time.sleep(random.uniform(3, 5)) # Random delay
 
         if "login" not in self.driver.current_url:
             print("   ✅ Session Active.")
@@ -137,8 +150,10 @@ class FreelancerAgent:
 
         try:
             self.driver.find_element(By.CSS_SELECTOR, "input[name='user'], input[type='email']").send_keys(username)
+            time.sleep(random.uniform(0.5, 1.5))
             pwd = self.driver.find_element(By.CSS_SELECTOR, "input[name='password'], input[type='password']")
             pwd.send_keys(password)
+            time.sleep(random.uniform(0.5, 1.5))
             pwd.send_keys(Keys.RETURN)
             time.sleep(5)
             print("   ✅ Login Sequence Complete.")
@@ -154,12 +169,25 @@ class FreelancerAgent:
         """
         print("\n🔎 Radar: Scanning for High-Value Targets...")
         self.driver.get("https://www.freelancer.com/jobs/python-automation/")
-        time.sleep(5)
+        time.sleep(random.uniform(4, 7))
 
         targets = []
         try:
-            # Get all project cards
-            cards = self.driver.find_elements(By.CSS_SELECTOR, "div.JobSearchCard-item")
+            # Get all project cards (Try multiple selectors)
+            selectors = [
+                "div.JobSearchCard-item", 
+                "div.ProjectCard", 
+                "div.JobSearchCard-primary",
+                "div[data-project-card]",
+                "tr.JobSearchCard-item"
+            ]
+            
+            cards = []
+            for sel in selectors:
+                found = self.driver.find_elements(By.CSS_SELECTOR, sel)
+                if found:
+                    cards = found
+                    break
             
             print(f"   👀 Visible Projects: {len(cards)}")
             
@@ -168,7 +196,17 @@ class FreelancerAgent:
 
             for card in cards:
                 try:
-                    title_el = card.find_element(By.CSS_SELECTOR, "a.JobSearchCard-primary-heading-link")
+                    # Try multiple title selectors
+                    title_selectors = ["a.JobSearchCard-primary-heading-link", "a.ProjectCard-title", "a.JobSearchCard-title"]
+                    title_el = None
+                    for t_sel in title_selectors:
+                        try:
+                            title_el = card.find_element(By.CSS_SELECTOR, t_sel)
+                            break
+                        except: continue
+                    
+                    if not title_el: continue
+
                     title = title_el.text.strip()
                     url = title_el.get_attribute("href")
                     
@@ -179,8 +217,10 @@ class FreelancerAgent:
                     # 2. Local Filter (Fast)
                     title_lower = title.lower()
                     if any(bad in title_lower for bad in keywords_bad):
+                        # print(f"      🗑️ Filtered (Bad Keyword): {title[:30]}...")
                         continue
                     if not any(good in title_lower for good in keywords_good):
+                        # print(f"      🗑️ Filtered (No Keywords): {title[:30]}...")
                         continue
 
                     targets.append({"title": title, "url": url})
@@ -189,6 +229,9 @@ class FreelancerAgent:
 
         except Exception as e:
             print(f"   ⚠️ Scan Error: {e}")
+            if "connection" in str(e).lower() or "refused" in str(e).lower() or "invalid session" in str(e).lower():
+                 print("   🛑 Browser connection lost. Stopping mission.")
+                 raise KeyboardInterrupt
 
         print(f"   🎯 Filtered Targets: {len(targets)} potential jobs.")
         return targets[:5] # Process top 5 to avoid fatigue
@@ -199,7 +242,7 @@ class FreelancerAgent:
         # Open Job
         self.driver.execute_script(f"window.open('{job['url']}', '_blank');")
         self.driver.switch_to.window(self.driver.window_handles[-1])
-        time.sleep(5)
+        time.sleep(random.uniform(4, 8))
 
         try:
             # Get Description
@@ -233,15 +276,21 @@ class FreelancerAgent:
 
             print(f"      ✍️  Proposal: \"{bid[:50]}...\"")
 
-            # 5. Submit
-            self._place_bid(bid)
+            # 5. Submit (or Dry Run)
+            if CONFIG.get("DRY_RUN", False):
+                print("      🧪 DRY RUN: Bid NOT submitted.")
+            else:
+                self._place_bid(bid)
+            
             self.memory.remember_application(job['url'], job['title'])
 
         except Exception as e:
             print(f"      ⚠️ Execution Error: {e}")
         finally:
-            self.driver.close()
-            self.driver.switch_to.window(self.driver.window_handles[0])
+            try:
+                self.driver.close()
+                self.driver.switch_to.window(self.driver.window_handles[0])
+            except: pass
 
     def _place_bid(self, text):
         try:
@@ -251,14 +300,14 @@ class FreelancerAgent:
             )
             # Scroll & Type
             self.driver.execute_script("arguments[0].scrollIntoView(true);", box)
-            time.sleep(1)
+            time.sleep(random.uniform(1, 2))
             box.clear()
             box.send_keys(text)
             
             # Click Button
             btn = self.driver.find_element(By.CSS_SELECTOR, "button#place-bid, button[data-id='place-bid-btn']")
             self.driver.execute_script("arguments[0].scrollIntoView(true);", btn)
-            time.sleep(1)
+            time.sleep(random.uniform(1, 2))
             btn.click()
             print("      ✅ BID SUBMITTED.")
         except:
@@ -277,12 +326,14 @@ class FreelancerAgent:
 
             for job in targets:
                 self.execute_job(job)
-                sleep_time = random.randint(10, 30)
+                sleep_time = random.randint(15, 45) # Increased cooldown
                 print(f"      zzz Cooling down ({sleep_time}s)...")
                 time.sleep(sleep_time)
 
     def close(self):
-        self.driver.quit()
+        try:
+            self.driver.quit()
+        except: pass
 '''
 
 with open('FreelancerOS/modules/agent_browser.py', 'w', encoding='utf-8') as f:
