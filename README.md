@@ -4,6 +4,8 @@ Bem-vindo ao seu escritório virtual. Este repositório centraliza todas as oper
 
 **Filosofia:** Alta Performance, Ética Profissional e Resultados Reais.
 
+> 🚀 **NOVO**: Agente 24/7 Totalmente Autônomo! [Quick Start em 5 minutos →](QUICKSTART.md)
+
 ---
 
 ## 📜 Índice
@@ -11,9 +13,10 @@ Bem-vindo ao seu escritório virtual. Este repositório centraliza todas as oper
 1. [Diretrizes & Ética](#-diretrizes--ética)
 2. [FreelancerOS (Utility Core)](#-freelanceros-the-ultimate-utility-core)
 3. [Agentes Autônomos (Zero-Touch)](#-agente-freelancer-autônomo-zero-touch)
-4. [Ventures (Triple Threat)](#-ventures-the-freelancer-triple-threat-engine)
-5. [Plano de Ação](#-plano-de-ação-diário)
-6. [Sistema de Regras de IA](#-sistema-de-regras-para-ia)
+4. [Automação 24/7](#-novo-automação-247-e-auto-sustentabilidade)
+5. [Ventures (Triple Threat)](#-ventures-the-freelancer-triple-threat-engine)
+6. [Plano de Ação](#-plano-de-ação-diário)
+7. [Sistema de Regras de IA](#-sistema-de-regras-para-ia)
 
 ---
 

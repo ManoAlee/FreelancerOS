@@ -15,6 +15,7 @@ from pathlib import Path
 from system.ai_engine.core import LLMEngine
 from system.data_pipeline.recorder import JobRecorder
 from system.config.config import CONFIG
+from system.modules.notifier import get_notifier
 
 # Configure logging
 log_dir = Path(CONFIG.get('LOG_FILE', '/app/logs/agent.log')).parent
@@ -38,6 +39,7 @@ class AutonomousLoop:
     def __init__(self, objective: str):
         self.objective = objective
         self.logger = logging.getLogger("ARCHON")
+        self.notifier = get_notifier()
         self.logger.info(f"🏛️  [ARCHON] Initializing with objective: {objective}")
         
         try:
@@ -45,6 +47,7 @@ class AutonomousLoop:
             self.memory = JobRecorder()
         except Exception as e:
             self.logger.error(f"❌ [ARCHON] Initialization error: {e}")
+            self.notifier.notify_error(str(e), "Initialization")
             raise
             
         self.context = {
@@ -57,8 +60,10 @@ class AutonomousLoop:
         self.retry_delay = CONFIG.get('RETRY_DELAY_SECONDS', 10)
         self.last_health_check = time.time()
         self.health_check_interval = CONFIG.get('HEALTH_CHECK_INTERVAL', 300)  # 5 minutes
+        self.jobs_processed_count = 0
         
         self.logger.info("✅ [ARCHON] Initialization complete")
+        self.notifier.notify_agent_started()
 
     def health_check(self):
         """Performs self-diagnostic checks."""
@@ -196,6 +201,7 @@ class AutonomousLoop:
     def _recovery_mode(self):
         """Attempts to recover from critical errors."""
         self.logger.info("🔧 [ARCHON] Entering recovery mode...")
+        self.notifier.notify_restart(self.error_count, self.max_errors)
         
         try:
             # Wait for a longer period
@@ -214,6 +220,7 @@ class AutonomousLoop:
             self.logger.info("✅ [ARCHON] Recovery complete. Resuming operations...")
         except Exception as e:
             self.logger.critical(f"🚨 [ARCHON] Recovery failed: {e}")
+            self.notifier.notify_critical(f"Recovery failed: {e}")
             # Let the system restart via Docker/systemd
 
     def run_forever(self):
@@ -221,6 +228,7 @@ class AutonomousLoop:
         self.logger.info("🚀 [ARCHON] Starting infinite loop...")
         
         loop_count = 0
+        last_daily_report = datetime.now().date()
         
         while True:
             try:
@@ -233,6 +241,17 @@ class AutonomousLoop:
                 if not self.health_check():
                     self.logger.warning("⚠️  [ARCHON] Health check failed, but continuing...")
                 
+                # Send daily summary
+                current_date = datetime.now().date()
+                if current_date != last_daily_report:
+                    stats = self.memory.get_stats()
+                    self.notifier.notify_daily_summary(stats)
+                    last_daily_report = current_date
+                
+                # Check for milestones
+                if self.jobs_processed_count > 0 and self.jobs_processed_count % 100 == 0:
+                    self.notifier.notify_job_milestone(f"{self.jobs_processed_count} jobs processed", self.jobs_processed_count)
+                
                 # Run cycle
                 decision = self.cycle()
                 
@@ -243,13 +262,16 @@ class AutonomousLoop:
                     self.logger.warning(f"⚠️  [ARCHON] Error in cycle. Waiting {self.retry_delay}s before retry...")
                     time.sleep(self.retry_delay)
                 else:
+                    self.jobs_processed_count += 1
                     time.sleep(CONFIG.get('LOOP_INTERVAL_SECONDS', 60) / 10)  # Quick iteration on success
                     
             except KeyboardInterrupt:
                 self.logger.info("\n⛔ [ARCHON] Shutdown signal received. Exiting gracefully...")
+                self.notifier.notify_agent_stopped("User interrupt")
                 break
             except Exception as e:
                 self.logger.critical(f"🚨 [ARCHON] Unhandled exception in main loop: {e}", exc_info=True)
+                self.notifier.notify_error(str(e), "Main loop exception")
                 time.sleep(self.retry_delay * 2)
                 
         self.logger.info("👋 [ARCHON] Shutdown complete.")
