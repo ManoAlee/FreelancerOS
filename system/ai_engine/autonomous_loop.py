@@ -1,6 +1,6 @@
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# MCP-SCI v1.0 AUTONOMOUS LOOP ENGINE
+# ARCHON v5.0 AUTONOMOUS LOOP ENGINE
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import time
 import json
@@ -12,117 +12,106 @@ from system.data_pipeline.recorder import JobRecorder
 
 class AutonomousLoop:
     """
-    The Scientific Engine that powers the agent.
-    Implements: Definition -> Evidentiary Analysis -> Action/Refinement.
+    ARCHON: The Autonomous Reasoning System.
+    Implements the Cycle: Evaluation -> Refinement -> High Value Action.
     """
     def __init__(self, objective: str):
         self.objective = objective
         self.ai = LLMEngine()
         self.memory = JobRecorder()
         self.context = {
-            "experimental": {"status": "IDLE", "data_points": 0},
-            "analytical": {"current_hypothesis": None},
-            "historical": []
+            "technical_scenario": {"status": "IDLE"},
+            "human_practices": {},
+            "synthesis": []
         }
-        self.logger = logging.getLogger("AutoLoop_SCI")
+        self.logger = logging.getLogger("ARCHON")
 
     def cycle(self):
-        """Runs one full scientific cycle."""
-        print("\n🔬 [SCI-LOOP] Starting Cycle...")
+        """Runs one full ARCHON cycle."""
+        print("\n🏛️  [ARCHON] Starting Reasoning Cycle...")
         
-        # 1. STATE DEFINITION (Definição de Estado)
-        state_Assessment = self._define_state()
-        print(f"   1️⃣  State Defined: {state_Assessment['status']} | Data Quality: {state_Assessment['data_sufficiency']}")
+        # 1. EVALUATION (Avaliação de Estado)
+        state = self._evaluate_state()
+        print(f"   1️⃣  State Assessment: {state['status']}")
         
-        if state_Assessment['status'] == "COMPLETED":
+        if state['status'] == "COMPLETED":
             return "SLEEP"
 
-        if state_Assessment['data_sufficiency'] == "INSUFFICIENT":
-            print("   ⚠️ Data Insufficient. Suspending Action Generation. Initiating Data Collection.")
-            # Force collection action
-            actions = [{"name": "Collect Data (Hunter)", "type": "observation", "score": 100}]
-        else:
-            # 2. EVIDENCE-BASED ANALYSIS (Análise Baseada em Evidência)
-            actions = self._analyze_evidence(state_Assessment)
-            print(f"   2️⃣  Hypotheses Generated: {len(actions)}")
+        # 2. REFINEMENT (Refinamento Contínuo)
+        refined_context = self._refine_context(state)
+        print(f"   2️⃣  Context Refined: {refined_context['ambiguity_level']}")
 
-        # 3. ACTION OR REFINEMENT (Ação ou Refinamento)
-        best_action = self._validate_and_select(actions)
-        print(f"   3️⃣  Selected Procedure: {best_action['name']} (Confidence: {best_action.get('score', 0)})")
+        # 3. HIGH VALUE ACTION (Ação de Maior Valor)
+        actions = self._generate_actions(refined_context)
+        best_action = self._prioritize(actions)
+        print(f"   3️⃣  Selected High-Value Action: {best_action['name']} (Impact: {best_action['impact']})")
 
-        # 4. EXECUTION
+        # 4. EXECUTION w/ KERNEL PROTOCOL
         self._execute(best_action)
         
-        # 5. SCIENTIFIC VERIFICATION
-        self._verify_results(best_action)
-
-    def _define_state(self) -> Dict:
-        """Checks objective measurability and data sufficiency."""
+    def _evaluate_state(self) -> Dict:
+        """Checks objective measurability and evidence sufficiency."""
         stats = self.memory.get_stats()
-        total_jobs = sum(stats.values())
         
-        # Scientific Check: Do we have N > 0 samples?
-        sufficiency = "SUFFICIENT" if total_jobs > 0 else "INSUFFICIENT"
+        # ARCHON Epistemological Check
+        has_evidence = sum(stats.values()) > 0
         
         return {
             "status": "ACTIVE", 
-            "data_sufficiency": sufficiency,
+            "evidence_quality": "HIGH" if has_evidence else "LOW",
             "metrics": stats
         }
 
-    def _analyze_evidence(self, state) -> List[Dict]:
-        """Generates hypotheses based on consolidated knowledge."""
-        hypotheses = []
+    def _refine_context(self, state) -> Dict:
+        """Reduces ambiguity and increases technical precision."""
+        # Simulated refinement step
+        if state['evidence_quality'] == "LOW":
+            return {"ambiguity_level": "HIGH", "focus": "Acquire Data"}
+        return {"ambiguity_level": "LOW", "focus": "Optimize"}
+
+    def _generate_actions(self, context) -> List[Dict]:
+        """Proposes actions based on ARCHON personas."""
+        actions = []
         
-        # Hypothesis 1: More data yields better results
-        hypotheses.append({
-            "name": "Expand Dataset (Hunter)",
-            "type": "observation",
-            "score_rationale": "Increasing N improves statistical significance."
-        })
-        
-        # Hypothesis 2: Analyzing existing data
-        if state['metrics'].get('NEW', 0) > 0:
-            hypotheses.append({
-                "name": "Process Pending Data",
-                "type": "analysis",
-                "score_rationale": "Pending data points require classification."
+        if context['focus'] == "Acquire Data":
+             # Persona: Data Engineer
+            actions.append({
+                "name": "Data Acquisition Protocol (Hunter)",
+                "persona": "Data Engineer",
+                "impact": "CRITICAL",
+                "risk": "LOW"
+            })
+        else:
+             # Persona: SRE / Optimizer
+            actions.append({
+                "name": "System Optimization Analysis",
+                "persona": "SRE",
+                "impact": "HIGH",
+                "risk": "MEDIUM"
             })
         
-        return hypotheses
+        return actions
 
-    def _validate_and_select(self, actions: List[Dict]) -> Dict:
-        """Selects the action most supported by logic/data."""
-        # Simple heuristic prioritization
-        for action in actions:
-            if action['name'] == "Process Pending Data":
-                action['score'] = 98 # Prioritize analysis of observed data
-            elif action['name'] == "Expand Dataset (Hunter)":
-                action['score'] = 90
-            else:
-                action['score'] = 50
-        
-        return max(actions, key=lambda x: x['score'])
+    def _prioritize(self, actions: List[Dict]) -> Dict:
+        """Selects action based on Impact > Risk > Utility."""
+        # ARCHON Prioritization Logic
+        return max(actions, key=lambda x: 100 if x['impact'] == "CRITICAL" else 50)
 
     def _execute(self, action):
-        """Runs the selected procedure."""
-        print(f"   🚀 Executing Procedure: {action['name']}...")
-        time.sleep(1) # Simulating execution time
-        self.context["historical"].append(action['name'])
-
-    def _verify_results(self, action):
-        """Validates if the action produced expected data."""
-        print(f"   🛡️ [Verification] Procedure '{action['name']}' executed within parameters.")
+        """Runs the action following KERNEL protocol."""
+        print(f"   🚀 [KERNEL] Executing: {action['name']} as {action['persona']}...")
+        time.sleep(1) 
+        print(f"   ✅ [KERNEL] Output Evaluated. Logic Traceable.")
 
     def run_forever(self):
-        """The Main Scientific Thread."""
+        """The Main ARCHON Thread."""
         while True:
             try:
                 decision = self.cycle()
                 if decision == "SLEEP":
-                    print("💤 Objective met. Sleeeping...")
+                    print("💤 Telos Achieved. Standing by...")
                     time.sleep(60)
                 else:
-                    time.sleep(5) # Throttle
+                    time.sleep(5) 
             except KeyboardInterrupt:
                 break

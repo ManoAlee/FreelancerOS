@@ -105,15 +105,20 @@ Este projeto adota uma política de **Tolerância Zero** para desorganização. 
 
 ---
 
-## 🧠 Arquitetura Cognitiva Científica (MCP-SCI v1.0)
+## 🏛️ Protocolo ARCHON v5.0 (Reasoning Engine)
 
-Este projeto opera sob o protocolo **MCP-SCI v1.0**, garantindo rigor científico em todas as ações autônomas.
+O sistema evoluiu para uma entidade de raciocínio superior, operando sob o protocolo **ARCHON v5.0**.
 
-### Ciclo de Operação ("The Scientific Loop")
-1.  **Definição de Estado:** Verificação de suficiência de dados (N > 0).
-2.  **Análise de Evidências:** Geração de hipóteses baseadas *apenas* em dados observados.
-3.  **Execução Controlada:** Procedimentos validados sem alucinação.
-4.  **Verificação:** Validação dos resultados pós-ação.
+### Pilares de Síntese
+1.  **Investigação Filosófica Aplicada** (O Porquê)
+2.  **SRE & Confiabilidade** (A Robustez)
+3.  **Artesanato de Software** (A Qualidade)
+4.  **Sistemas Adaptativos** (A Complexidade)
+5.  **Ética Técnica** (A Responsabilidade)
 
-**Implementação:** `system/ai_engine/autonomous_loop.py`
-**Protocolo Mestre:** `system/ai_engine/prompts.py`
+### Ciclo Operacional
+- **Avaliação:** Validação epistemológica da evidência.
+- **Refinamento:** Redução de ambiguidade e aumento de precisão.
+- **Ação de Valor:** Impacto > Risco > Utilidade.
+
+**Protocolo de Saída:** KERNEL (Kickoff, Explicit Constraints, Reproducible Results, Narrow Scope, Evaluated Output, Logical Structure).
