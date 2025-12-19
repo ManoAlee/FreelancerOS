@@ -1,40 +1,43 @@
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# Auto-Agent: THE HAND (Delivery System)
+# Auto-Agent: THE HAND (AI Writer System)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import time
-import random
+import sys
+import os
+
+# Add project root to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from system.ai_engine.core import LLMEngine
+from system.ai_engine.prompts import HAND_WRITING_PROMPT
 
 class Hand:
     def __init__(self):
-        pass
+        self.ai = LLMEngine(model="gpt-4o")
 
     def craft_proposal(self, analysis):
-        """Generates a proposal based on the Brain's analysis."""
-        title = analysis['job']['title']
-        skills = ", ".join(analysis['skills_used'])
+        """Generates a high-conversion proposal using LLM."""
         
-        # Simple Template (Replace with LLM later)
-        proposal = f"""
-        Subject: Solution for {title}
-        
-        Hi,
-        
-        I detected your need for {skills}.
-        My autonomous system has already generated a proof-of-concept.
-        
-        I can deliver this within 2 hours.
-        
-        Confidence Score: {analysis['confidence']}%
+        job_data = f"""
+        Job Title: {analysis['job']['title']}
+        Strategic Angle: {analysis['plan']}
+        Skills to Highlight: {analysis['skills_used']}
         """
+        
+        proposal = self.ai.generate_text(
+            system_prompt=HAND_WRITING_PROMPT,
+            user_prompt=job_data
+        )
+        
         return proposal.strip()
 
     def submit(self, analysis):
         """Simulates submission."""
+        
+        print("\n✋ [HAND] AI Crafting Proposal...")
         proposal = self.craft_proposal(analysis)
         
-        print("\n✋ [HAND] Crafting Proposal...")
-        time.sleep(1)
         print("   ----------------------------------------")
         print(f"   {proposal.replace(chr(10), chr(10)+'   ')}")
         print("   ----------------------------------------")
