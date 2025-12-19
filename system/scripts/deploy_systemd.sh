@@ -41,6 +41,14 @@ mkdir -p "$PROJECT_DIR/data" "$PROJECT_DIR/logs"
 echo "📦 Installing Python dependencies..."
 pip3 install -r "$PROJECT_DIR/system/requirements.txt"
 
+# Validate SUDO_USER
+if [ -z "$SUDO_USER" ]; then
+    echo "⚠️  SUDO_USER not set, using current user"
+    SERVICE_USER=$(whoami)
+else
+    SERVICE_USER=$SUDO_USER
+fi
+
 # Create systemd service file
 SERVICE_FILE="/etc/systemd/system/freelanceros-agent.service"
 echo "📝 Creating systemd service file..."
@@ -53,8 +61,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=$SUDO_USER
-Group=$SUDO_USER
+User=$SERVICE_USER
+Group=$SERVICE_USER
 WorkingDirectory=$PROJECT_DIR
 Environment="PYTHONUNBUFFERED=1"
 Environment="PYTHONPATH=$PROJECT_DIR"

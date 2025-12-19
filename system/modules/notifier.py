@@ -66,7 +66,7 @@ class Notifier:
                         <h2>🤖 FreelancerOS Agent</h2>
                     </div>
                     <div class="content">
-                        <p>{html.escape(body).replace(chr(10), '<br>')}</p>
+                        <p>{html.escape(body).replace('\n', '<br>')}</p>
                     </div>
                     <div class="footer">
                         <p>Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>

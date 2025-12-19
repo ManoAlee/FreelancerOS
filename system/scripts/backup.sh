@@ -71,12 +71,15 @@ EOF
 
 # Add git info only if .git directory exists
 if [ -d "${PROJECT_DIR}/.git" ]; then
-    cd "${PROJECT_DIR}"
-    cat >> "${TEMP_BACKUP}/backup_info.txt" << EOF
+    if cd "${PROJECT_DIR}" 2>/dev/null; then
+        cat >> "${TEMP_BACKUP}/backup_info.txt" << EOF
 Version: $(git describe --tags --always 2>/dev/null || echo "unknown")
 Commit: $(git rev-parse HEAD 2>/dev/null || echo "unknown")
 EOF
-    cd - > /dev/null
+        cd - > /dev/null
+    else
+        echo -e "${YELLOW}⚠${NC} Could not access project directory for git info"
+    fi
 fi
 
 cat >> "${TEMP_BACKUP}/backup_info.txt" << EOF
