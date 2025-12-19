@@ -6,3 +6,7 @@ selenium
 webdriver-manager
 instagrapi
 tweepy
+feedparser
+python-dotenv
+psutil
+pyyaml

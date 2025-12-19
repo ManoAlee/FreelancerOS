@@ -94,6 +94,62 @@ python projects/auto_agent/auto_main.py
 
 ---
 
+## 🤖 NOVO: Automação 24/7 e Auto-Sustentabilidade
+
+O FreelancerOS agora suporta **operação totalmente autônoma e contínua** com recuperação automática de erros!
+
+### 🚀 Implantação Rápida
+
+**Opção 1: Docker (Recomendado)**
+```bash
+# Configure suas credenciais
+cp .env.example .env
+nano .env
+
+# Implante com um comando
+./system/scripts/deploy_docker.sh
+```
+
+**Opção 2: Systemd (Linux)**
+```bash
+# Implante como serviço do sistema
+sudo ./system/scripts/deploy_systemd.sh
+```
+
+### 📊 Monitoramento
+
+```bash
+# Verifique a saúde do agente
+python3 system/scripts/health_check.py
+
+# Veja logs em tempo real
+docker-compose logs -f  # Docker
+sudo journalctl -u freelanceros-agent -f  # Systemd
+```
+
+### 💾 Backup Automático
+
+```bash
+# Execute backup manual
+./system/scripts/backup.sh
+
+# Configure cron para backups automáticos diários
+0 2 * * * /path/to/FreelancerOS/system/scripts/backup.sh
+```
+
+### 🔑 Recursos de Auto-Sustentabilidade
+
+✅ **Recuperação Automática de Erros** - O agente se recupera automaticamente de falhas  
+✅ **Health Checks Periódicos** - Autodiagnóstico a cada 5 minutos  
+✅ **Logging Abrangente** - Rastreamento completo de todas as operações  
+✅ **Retry com Backoff Exponencial** - Tentativas inteligentes em caso de falha  
+✅ **Reinício Automático** - Docker/Systemd reinicia o agente se ele parar  
+✅ **Gestão de Recursos** - Monitoramento de memória e CPU  
+
+📖 **[Guia Completo de Implantação](docs/DEPLOYMENT_GUIDE.md)**
+
+---
+
 ## 🛡️ Sistema de Regras de IA
 
 Este projeto adota uma política de **Tolerância Zero** para desorganização. Todas as IAs que interagirem com este repositório devem seguir estritamente o arquivo `AI_RULES.md`.

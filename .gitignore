@@ -4,3 +4,17 @@ __pycache__/
 mission_memory.json
 .env
 venv/
+*.db
+*.sqlite
+*.sqlite3
+data/
+logs/
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+node_modules/
+dist/
+build/
