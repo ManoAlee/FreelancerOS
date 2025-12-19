@@ -14,6 +14,7 @@ DB_PATH = os.path.join(DB_DIR, "agent_memory.db")
 
 class JobRecorder:
     def __init__(self):
+        self.db_path = DB_PATH
         self.conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         self.cursor = self.conn.cursor()
         self._init_db()

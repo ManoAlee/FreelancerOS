@@ -1,0 +1,49 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# FreelancerOS: Systemd Service Configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 
+# Installation Instructions:
+# 1. Edit this file and replace /path/to/FreelancerOS with your actual path
+# 2. Copy to systemd: sudo cp freelanceros-agent.service /etc/systemd/system/
+# 3. Reload systemd: sudo systemctl daemon-reload
+# 4. Enable service: sudo systemctl enable freelanceros-agent
+# 5. Start service: sudo systemctl start freelanceros-agent
+# 6. Check status: sudo systemctl status freelanceros-agent
+#
+# View logs: sudo journalctl -u freelanceros-agent -f
+
+[Unit]
+Description=FreelancerOS Autonomous Agent
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/FreelancerOS
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONPATH=/path/to/FreelancerOS"
+EnvironmentFile=/path/to/FreelancerOS/.env
+
+# Main command
+ExecStart=/usr/bin/python3 /path/to/FreelancerOS/projects/auto_agent/auto_main.py
+
+# Restart policy for 24/7 operation
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=freelanceros-agent
+
+# Security hardening (optional)
+NoNewPrivileges=true
+PrivateTmp=true
+ReadWritePaths=/path/to/FreelancerOS/data /path/to/FreelancerOS/logs
+
+[Install]
+WantedBy=multi-user.target
