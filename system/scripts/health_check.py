@@ -26,11 +26,8 @@ def check_database():
         recorder = JobRecorder()
         stats = recorder.get_stats()
         
-        # Get database path from recorder
-        db_path = os.path.join(os.path.dirname(recorder.conn.execute("PRAGMA database_list").fetchone()[2] or ""), "agent_memory.db")
-        
         print("📊 Database Status: ✅ CONNECTED")
-        print(f"   Location: {db_path}")
+        print(f"   Location: {recorder.db_path}")
         return True, stats
     except Exception as e:
         print(f"📊 Database Status: ❌ ERROR")
@@ -50,7 +47,7 @@ def check_logs():
         print(f"   Location: {log_file}")
         print(f"   Size: {size_mb:.2f} MB")
         print(f"   Last Modified: {modified.strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"   ({time_since.seconds // 60} minutes ago)")
+        print(f"   ({int(time_since.total_seconds()) // 60} minutes ago)")
         
         # Check if log is recent (within last hour)
         if time_since < timedelta(hours=1):

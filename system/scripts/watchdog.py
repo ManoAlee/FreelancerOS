@@ -18,10 +18,13 @@ CHECK_INTERVAL = 60  # Check every 60 seconds
 MAX_RESTART_ATTEMPTS = 5
 RESTART_COOLDOWN = 300  # 5 minutes between restart attempts
 
-# Determine log file location
-LOG_FILE = os.getenv('WATCHDOG_LOG_FILE', 
-                     str(Path.home() / 'logs' / 'watchdog.log') if os.path.exists('/app') 
-                     else '/app/logs/watchdog.log')
+# Determine log file location based on environment
+if os.path.exists('/app'):
+    # Running in Docker container
+    LOG_FILE = os.getenv('WATCHDOG_LOG_FILE', '/app/logs/watchdog.log')
+else:
+    # Running natively
+    LOG_FILE = os.getenv('WATCHDOG_LOG_FILE', str(Path.home() / 'logs' / 'watchdog.log'))
 
 # Setup logging
 logging.basicConfig(
