@@ -17,7 +17,11 @@ from pathlib import Path
 CHECK_INTERVAL = 60  # Check every 60 seconds
 MAX_RESTART_ATTEMPTS = 5
 RESTART_COOLDOWN = 300  # 5 minutes between restart attempts
-LOG_FILE = "/app/logs/watchdog.log"
+
+# Determine log file location
+LOG_FILE = os.getenv('WATCHDOG_LOG_FILE', 
+                     str(Path.home() / 'logs' / 'watchdog.log') if os.path.exists('/app') 
+                     else '/app/logs/watchdog.log')
 
 # Setup logging
 logging.basicConfig(
@@ -129,7 +133,7 @@ class AgentWatchdog:
             
             # If database hasn't been modified in 10 minutes, might be stuck
             if time_since > timedelta(minutes=10):
-                logger.warning(f"⚠️  Database not updated for {time_since.seconds // 60} minutes")
+                logger.warning(f"⚠️  Database not updated for {int(time_since.total_seconds()) // 60} minutes")
                 # Don't restart immediately, just log the warning
                 # The agent might be idle waiting for new jobs
         
@@ -145,8 +149,8 @@ class AgentWatchdog:
         # Check cooldown period
         if self.last_restart:
             time_since = datetime.now() - self.last_restart
-            if time_since.seconds < RESTART_COOLDOWN:
-                remaining = RESTART_COOLDOWN - time_since.seconds
+            if time_since.total_seconds() < RESTART_COOLDOWN:
+                remaining = int(RESTART_COOLDOWN - time_since.total_seconds())
                 logger.warning(f"⏳ Restart cooldown: {remaining}s remaining")
                 return False
         

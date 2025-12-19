@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import sys
+import psutil
 from datetime import datetime
 from typing import Dict, Any, List
 from pathlib import Path
@@ -79,7 +80,6 @@ class AutonomousLoop:
             self.logger.info(f"📊 [ARCHON] Database status: {stats}")
             
             # Check memory usage (basic check)
-            import psutil
             process = psutil.Process()
             memory_mb = process.memory_info().rss / 1024 / 1024
             self.logger.info(f"💾 [ARCHON] Memory usage: {memory_mb:.2f} MB")

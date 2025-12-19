@@ -67,8 +67,17 @@ FreelancerOS Backup
 Date: $(date)
 Hostname: $(hostname)
 Project: FreelancerOS
+EOF
+
+# Add git info only if .git directory exists
+if [ -d "${PROJECT_DIR}/.git" ]; then
+cat >> "${TEMP_BACKUP}/backup_info.txt" << EOF
 Version: $(git describe --tags --always 2>/dev/null || echo "unknown")
 Commit: $(git rev-parse HEAD 2>/dev/null || echo "unknown")
+EOF
+fi
+
+cat >> "${TEMP_BACKUP}/backup_info.txt" << EOF
 
 Contents:
 - Database (agent_memory.db)

@@ -6,6 +6,7 @@
 import os
 import logging
 import smtplib
+import html
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
@@ -65,7 +66,7 @@ class Notifier:
                         <h2>🤖 FreelancerOS Agent</h2>
                     </div>
                     <div class="content">
-                        <p>{body.replace(chr(10), '<br>')}</p>
+                        <p>{html.escape(body).replace(chr(10), '<br>')}</p>
                     </div>
                     <div class="footer">
                         <p>Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>

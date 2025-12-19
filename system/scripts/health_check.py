@@ -26,8 +26,11 @@ def check_database():
         recorder = JobRecorder()
         stats = recorder.get_stats()
         
+        # Get database path from recorder
+        db_path = os.path.join(os.path.dirname(recorder.conn.execute("PRAGMA database_list").fetchone()[2] or ""), "agent_memory.db")
+        
         print("📊 Database Status: ✅ CONNECTED")
-        print(f"   Location: {recorder.cursor.connection}")
+        print(f"   Location: {db_path}")
         return True, stats
     except Exception as e:
         print(f"📊 Database Status: ❌ ERROR")
