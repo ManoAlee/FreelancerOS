@@ -1,4 +1,6 @@
 import os
+
+content = r'''import os
 import time
 import json
 import re
@@ -329,3 +331,8 @@ class FreelancerAgent:
         try:
             self.driver.quit()
         except: pass
+'''
+
+with open('FreelancerOS/modules/agent_browser.py', 'w', encoding='utf-8') as f:
+    f.write(content)
+print("File updated successfully.")
